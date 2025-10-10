@@ -15,6 +15,7 @@ protected:
 private:
     QAction *m_insertReturnAction;
     QAction *m_insertLeftAction;
+    QAction *m_insertTabAction;
 };
 
 #endif // LINEEDIT_HPP

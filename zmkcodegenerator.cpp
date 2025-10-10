@@ -207,6 +207,7 @@ QString ZmkCodeGenerator::zmkKeycode(const QString &c)
 
         {"←",  "LEFT"},
         {"⏎", "RET"},
+        {"⇥", "TAB"},
 
         {"é",  "E"}
     };
