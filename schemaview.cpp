@@ -11,7 +11,8 @@ SchemaView::SchemaView(QWidget *parent)
       m_expandAllAction{new QAction{"Expand All", this}},
       m_collapseAllAction{new QAction{"Collapse All", this}},
       m_expandToMorphsAction{new QAction{"Expand to Morphs", this}},
-      m_expandThisToMorphsAction{new QAction{"Expand this to Morphs", this}}
+      m_expandThisToMorphsAction{new QAction{"Expand this to Morphs", this}},
+      m_expandThisToModsAction{new QAction{"Expand this to Mods", this}}
 {
     setItemDelegateForColumn(SchemaModel::ModeColumn, new ModeDelegate);
     setItemDelegateForColumn(SchemaModel::ValueColumn, new ValueDelegate);
@@ -29,12 +30,16 @@ SchemaView::SchemaView(QWidget *parent)
     connect(m_collapseAllAction, &QAction::triggered, this, &SchemaView::collapseAll);
     connect(m_expandToMorphsAction, &QAction::triggered, this, [this](){ expandToDepth(1); });
     connect(m_expandThisToMorphsAction, &QAction::triggered, this, [this](){ expandRecursively(currentIndex(), 1); });
+    connect(m_expandThisToModsAction, &QAction::triggered, this, [this](){ expandRecursively(currentIndex(), 5); });
 }
 
 void SchemaView::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu;
-    menu.addAction(m_expandThisToMorphsAction);
+    if (currentIndex().isValid()) {
+        menu.addAction(m_expandThisToMorphsAction);
+        menu.addAction(m_expandThisToModsAction);
+    }
     menu.addAction(m_expandAllAction);
     menu.addAction(m_collapseAllAction);
     menu.addAction(m_expandToMorphsAction);

@@ -18,6 +18,7 @@ private:
     QAction *m_collapseAllAction;
     QAction *m_expandToMorphsAction;
     QAction *m_expandThisToMorphsAction;
+    QAction *m_expandThisToModsAction;
 };
 
 class ModeDelegate : public QStyledItemDelegate
