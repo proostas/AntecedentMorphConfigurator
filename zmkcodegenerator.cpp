@@ -1,5 +1,7 @@
 #include "zmkcodegenerator.hpp"
 #include "schema.hpp"
+#include <QHash>
+#include <QRegularExpression>
 
 ZmkCodeGenerator::ZmkCodeGenerator(Schema *schema)
     : CodeGenerator{schema, CodeGenerator::ZMKFirmware}
