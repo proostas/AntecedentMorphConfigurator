@@ -988,6 +988,10 @@ QString ZmkCodeGenerator::buildMacro(const QString &symbol, const QString &label
 
     sequence += taps;
 
+    // protect from rare occasion when comment ends in \ and merges with the next line
+    if (val.trimmed().endsWith('\\'))
+        val.append(u'·');
+
     return out.arg(m_schema->prefix(), label, pre, val, sequence).prepend(QString{}.fill(' ', 8)).append("\n");
 }
 
