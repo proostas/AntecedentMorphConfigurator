@@ -21,12 +21,15 @@ public:
     int type();
     void setPrefix(QString const &prefix);
     QString prefix() const;
+    void setBackspacePolicy(int policy);
+    int backspacePolicy() const;
 
 private:
     QLineEdit *m_name;
     QLineEdit *m_version;
     QComboBox *m_type;
     QLineEdit *m_prefix;
+    QComboBox *m_backspacePolicy;
     QSpacerItem *m_spacer;
     QDialogButtonBox *m_buttonBox;
 };

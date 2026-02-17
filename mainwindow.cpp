@@ -207,6 +207,7 @@ void MainWindow::editSchemaProperties()
     dialog.setVersion(m_schema->version());
     dialog.setType(m_schema->type());
     dialog.setPrefix(m_schema->prefix());
+    dialog.setBackspacePolicy(m_schema->backspacePolicy());
     if (dialog.exec() == QDialog::Accepted) {
         m_schema->setName(dialog.name());
         m_schema->setVersion(dialog.version());
@@ -215,6 +216,7 @@ void MainWindow::editSchemaProperties()
             m_model->afterSchemaChange();
         }
         m_schema->setPrefix(dialog.prefix());
+        m_schema->setBackspacePolicy(static_cast<Schema::BackspacePolicy>(dialog.backspacePolicy()));
         updateWindowTitle();
     }
 }

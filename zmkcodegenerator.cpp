@@ -914,7 +914,10 @@ QString ZmkCodeGenerator::buildMacro(const QString &symbol, const QString &label
     QString out = tmpl;
     QString pre, firstOp;
     QString val = value;
-    if (symbol.toLower() == val.first(1).toLower()) {
+    if (symbol.toLower() == (m_schema->backspacePolicy() == Schema::BackspaceOnDifferentLetter
+            ? val.first(1).toLower()
+            : val.first(1)))
+    {
         pre = QString("(") + val.first(1).toLower() + ")";
         firstOp = "";
         val = val.sliced(1);

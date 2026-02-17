@@ -10,6 +10,7 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(QWidget *parent)
       m_version{new QLineEdit},
       m_type{new QComboBox},
       m_prefix{new QLineEdit},
+      m_backspacePolicy{new QComboBox},
       m_spacer{new QSpacerItem{20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding}},
       m_buttonBox{new QDialogButtonBox{QDialogButtonBox::Ok|QDialogButtonBox::Cancel}}
 
@@ -22,6 +23,8 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(QWidget *parent)
     m_type->addItems(QStringList{} << "Flat" << "Deep");
     layout->addRow("Type:", m_type);
     layout->addRow("Prefix:", m_prefix);
+    m_backspacePolicy->addItems(QStringList{} << "On different Letter (a == A)" << "On different Character (a != A)");
+    layout->addRow("Backspace:", m_backspacePolicy);
     layout->addItem(m_spacer);
     layout->addWidget(m_buttonBox);
 
@@ -67,4 +70,14 @@ void SchemaPropertiesDialog::setPrefix(const QString &prefix)
 QString SchemaPropertiesDialog::prefix() const
 {
     return m_prefix->text();
+}
+
+void SchemaPropertiesDialog::setBackspacePolicy(int policy)
+{
+    m_backspacePolicy->setCurrentIndex(policy);
+}
+
+int SchemaPropertiesDialog::backspacePolicy() const
+{
+    return m_backspacePolicy->currentIndex();
 }

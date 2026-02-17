@@ -100,6 +100,7 @@ Schema::Schema(Type type, SchemaItem *parent)
       m_version{},
       m_type{type},
       m_prefix{},
+      m_backspacePolicy{BackspaceOnDifferentLetter},
       m_antecedents{},
       m_changed{false}
 {
@@ -142,6 +143,7 @@ bool Schema::fromJson(const QJsonDocument &jsonDoc)
     m_version = schema["version"].toString();
     m_type = static_cast<Type>(schema["type"].toInt());
     m_prefix = schema["prefix"].toString();
+    m_backspacePolicy = static_cast<BackspacePolicy>(schema["backspacePolicy"].toInt());
     m_changed = false;
 
     auto antecedents = schema["antecedents"].toObject();
@@ -162,6 +164,7 @@ QJsonDocument Schema::toJson()
     schema["version"] = m_version;
     schema["type"] = m_type;
     schema["prefix"] = m_prefix;
+    schema["backspacePolicy"] = m_backspacePolicy;
     QJsonObject antecedents;
     for (auto const &a : m_antecedents) {
         antecedents[QString::number(a->type())] = a->toJson(m_type);
@@ -177,6 +180,7 @@ void Schema::clear()
     m_name.clear();
     m_version.clear();
     m_type = Flat;
+    m_backspacePolicy = BackspaceOnDifferentLetter;
     m_prefix.clear();
     m_changed = false;
     std::for_each(m_antecedents.cbegin(), m_antecedents.cend(),
@@ -236,6 +240,21 @@ bool Schema::setPrefix(const QString &prefix)
 QString Schema::prefix() const
 {
     return m_prefix;
+}
+
+bool Schema::setBackspacePolicy(BackspacePolicy policy)
+{
+    if(m_backspacePolicy == policy)
+        return false;
+
+    m_backspacePolicy = policy;
+    m_changed = true;
+    return true;
+}
+
+Schema::BackspacePolicy Schema::backspacePolicy() const
+{
+    return m_backspacePolicy;
 }
 
 bool Schema::isEmpty(LayerType layerType, MorphType morphType) const

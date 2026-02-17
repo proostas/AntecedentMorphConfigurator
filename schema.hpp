@@ -97,6 +97,7 @@ public:
     friend class ZmkCodeGenerator;
 public:
     enum Type {Flat, Deep};
+    enum BackspacePolicy {BackspaceOnDifferentLetter, BackspaceOnDifferentCharacter};
 public:
     Schema(Type type, SchemaItem *parent = nullptr);
     ~Schema() override = default;
@@ -118,6 +119,8 @@ public:
     Type type() const;
     bool setPrefix(QString const &prefix);
     QString prefix() const;
+    bool setBackspacePolicy(BackspacePolicy policy);
+    BackspacePolicy backspacePolicy() const;
 
     bool isEmpty(LayerType layerType, MorphType morphType) const;
     bool isEmpty(LayerType layerType, MorphType morphType, ModType modType) const;
@@ -145,6 +148,7 @@ private:
     QString m_version;
     Type m_type;
     QString m_prefix;
+    BackspacePolicy m_backspacePolicy;
     std::vector<std::unique_ptr<Antecedent>> m_antecedents;
     bool m_changed;
 };
