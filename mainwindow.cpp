@@ -7,6 +7,7 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include "schemapropertiesdialog.hpp"
+#include "preferencesdialog.hpp"
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QFile>
@@ -19,6 +20,7 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include "codegeneratordialog.hpp"
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -35,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui.closeAction, &QAction::triggered, this, &MainWindow::close);
     connect(ui.quitAction, &QAction::triggered, qApp, &QApplication::quit);
     connect(ui.schemaPropsAction, &QAction::triggered, this, &MainWindow::editSchemaProperties);
+    connect(ui.preferencesAction, &QAction::triggered, this, &MainWindow::editPreferences);
     connect(ui.zmkGeneratorAction, &QAction::triggered, this, [this](){
         CodeGeneratorDialog{m_schema.get(), CodeGenerator::ZMKFirmware, this}.exec();
     });
@@ -93,12 +96,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 bool MainWindow::save()
 {
+    QSettings settings;
+    auto dstPath = settings.value("paths/source").toString();
     QString filePath;
     if (m_schema->isNew()) {
         filePath = QFileDialog::getSaveFileName(
             this, "Save Configuration",
             QString{"%1/%2"}
-                    .arg(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0))
+                    .arg(!dstPath.isEmpty() ? dstPath : QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0))
                     .arg(m_schema->suggestedFileName()),
             "All Files (*);;AMConf Files (*.amconf)");
         if (filePath.isEmpty())
@@ -129,9 +134,11 @@ bool MainWindow::save()
 
 bool MainWindow::open()
 {
+    QSettings settings;
+    auto dstPath = settings.value("paths/source").toString();
     QString filePath = QFileDialog::getOpenFileName(
                 this, "Open Configuration",
-                QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0),
+                !dstPath.isEmpty() ? dstPath : QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0),
                 "All Files (*);;AMConf Files (*.amconf)");
     if (filePath.isEmpty())
         return false;
@@ -167,10 +174,12 @@ bool MainWindow::open()
 
 bool MainWindow::saveAs()
 {
+    QSettings settings;
+    auto dstPath = settings.value("paths/source").toString();
     QString filePath = QFileDialog::getSaveFileName(
         this, "Save Configuration",
         QString{"%1/%2"}
-                .arg(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0))
+                .arg(!dstPath.isEmpty() ? dstPath : QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0))
                 .arg(m_schema->suggestedFileName()),
         "All Files (*);;AMConf Files (*.amconf)");
     if (filePath.isEmpty())
@@ -221,6 +230,12 @@ void MainWindow::editSchemaProperties()
     }
 }
 
+void MainWindow::editPreferences()
+{
+    PreferencesDialog dialog{this};
+    dialog.exec();
+}
+
 MainWindow::Ui::Ui(MainWindow *mainWindow)
     : centralWidget{new QWidget{mainWindow}},
       view{new SchemaView{centralWidget}},
@@ -234,6 +249,7 @@ MainWindow::Ui::Ui(MainWindow *mainWindow)
       quitAction{new QAction{mainWindow}},
       settingsMenu{new QMenu{menuBar}},
       schemaPropsAction{new QAction{mainWindow}},
+      preferencesAction{new QAction{mainWindow}},
       generatorMenu{new QMenu{menuBar}},
       zmkGeneratorAction{new QAction{mainWindow}},
       qmkGeneratorAction{new QAction{mainWindow}},
@@ -276,6 +292,9 @@ MainWindow::Ui::Ui(MainWindow *mainWindow)
 
     schemaPropsAction->setText("Schema properties");
     settingsMenu->addAction(schemaPropsAction);
+
+    preferencesAction->setText("Preferences");
+    settingsMenu->addAction(preferencesAction);
 
     generatorMenu->setTitle("Generator");
     menuBar->addAction(generatorMenu->menuAction());

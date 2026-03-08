@@ -33,6 +33,7 @@ private:
     void setupUi();
     void updateWindowTitle();
     void editSchemaProperties();
+    void editPreferences();
 
 private:
     struct Ui {
@@ -49,6 +50,7 @@ private:
         QAction *quitAction;
         QMenu *settingsMenu;
         QAction *schemaPropsAction;
+        QAction *preferencesAction;
         QMenu *generatorMenu;
         QAction *zmkGeneratorAction;
         QAction *qmkGeneratorAction;

@@ -13,6 +13,7 @@
 #include "zmkcodegenerator.hpp"
 #include "qmkcodegenerator.hpp"
 #include <QFile>
+#include <QSettings>
 
 CodeGeneratorDialog::CodeGeneratorDialog(Schema *schema, CodeGenerator::Firmware firmware, QWidget *parent)
     : QDialog{parent},
@@ -36,9 +37,11 @@ CodeGeneratorDialog::CodeGeneratorDialog(Schema *schema, CodeGenerator::Firmware
     m_outputLayout->addWidget(m_outputPath);
     m_outputPathSelector->setText("...");
     connect(m_outputPathSelector, &QToolButton::clicked, this, [this](){
+        QSettings settings;
+        auto path = settings.value("paths/zmkConfig").toString();
         QString filePath = QFileDialog::getSaveFileName(
             this, "Destination File Path",
-            QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0),
+            !path.isEmpty() ? path : QStandardPaths::standardLocations(QStandardPaths::HomeLocation).value(0),
             "All Files (*)");
         if (filePath.isEmpty())
             return;

@@ -22,6 +22,7 @@ qt_add_executable(antecedent-morph-configurator
     codegenerator.hpp codegenerator.cpp
     zmkcodegenerator.hpp zmkcodegenerator.cpp
     qmkcodegenerator.hpp qmkcodegenerator.cpp
+    preferencesdialog.hpp preferencesdialog.cpp
 )
 
 target_link_libraries(antecedent-morph-configurator
