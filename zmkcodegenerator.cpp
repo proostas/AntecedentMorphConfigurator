@@ -14,7 +14,7 @@ std::pair<bool, QString> ZmkCodeGenerator::verify()
     for (auto const &a: m_schema->m_antecedents) {
         for (auto const &l: a->m_layers) {
             for (auto const &m: l->m_morphs) {
-                if (!m->isEmpty() && !m->isValid())
+                if (!m->isEmpty() && !m->isValid(a->type()))
                     return {false, QString{"[%1.%2.%3] Invalid value: '%4'"}
                         .arg(a->name())
                         .arg(l->name())
@@ -29,7 +29,7 @@ std::pair<bool, QString> ZmkCodeGenerator::verify()
                             .arg(*i)};
                 }
                 for (auto const &md: m->m_mods) {
-                    if (!md->isEmpty() && !md->isValid())
+                    if (!md->isEmpty() && !md->isValid(a->type()))
                         return {false, QString{"[%1.%2.%3.%4] Invalid value: '%5'"}
                             .arg(a->name())
                             .arg(l->name())
@@ -62,22 +62,22 @@ std::pair<bool, QString> ZmkCodeGenerator::prepare()
     for (auto const &a: m_schema->m_antecedents) {
         for (auto const &l: a->m_layers) {
             for (auto const &m: l->m_morphs) {
-                if (!m->isEmpty() && !m->isSingleLettered(a->symbol()) && static_cast<Mode>(m->mode()) != Mode::MacroName) {
+                if (!m->isEmpty() && !m->isSingleLettered(a->type()) && static_cast<Mode>(m->mode()) != Mode::MacroName) {
                     QString macroLabel = buildMacroLabel(
                                 (m->mode() == int(Mode::SchemaName) ? m_schema->fullName() : m->value()),
                                 usedMacroLabels);
                     usedMacroLabels[macroLabel] = true;
-                    auto macroParams = std::make_unique<MacroParams>(macroLabel, a->symbol(), m.get());
+                    auto macroParams = std::make_unique<MacroParams>(macroLabel, a->symbol(), a->type(), m.get());
                     m_orderedMacros.push_back(macroParams.get());
                     m_macros[m.get()] = std::move(macroParams);
                 }
                 for (auto const &md: m->m_mods) {
-                    if (!md->isEmpty() && !md->isSingleLettered(a->symbol()) && static_cast<Mode>(m->mode()) != Mode::MacroName) {
+                    if (!md->isEmpty() && !md->isSingleLettered(a->type()) && static_cast<Mode>(m->mode()) != Mode::MacroName) {
                         QString macroLabel = buildMacroLabel(
                                     (md->mode() == int(Mode::SchemaName) ? m_schema->fullName() : md->value()),
                                     usedMacroLabels);
                         usedMacroLabels[macroLabel] = true;
-                        auto macroParams = std::make_unique<MacroParams>(macroLabel, a->symbol(), md.get());
+                        auto macroParams = std::make_unique<MacroParams>(macroLabel, a->symbol(), a->type(), md.get());
                         m_orderedMacros.push_back(macroParams.get());
                         m_macros[md.get()] = std::move(macroParams);
                     }
@@ -252,9 +252,10 @@ void ZmkCodeGenerator::generateBaseBehaviors(QTextStream &out)
             auto const macroParams = m_macros.find(morph);
             bindings << (static_cast<Mode>(morph->mode()) == Mode::MacroName
                         ? QString{"<&amstdm_%1>"}.arg(morph->value())
-                        : buildBinding(morph->isSingleLettered(a->symbol()),
+                        : buildBinding(morph->isSingleLettered(a->type()),
                                        (macroParams != m_macros.cend() ? macroParams->second->label : QString{}),
-                                       morph->value()));
+                                       morph->value(),
+                                       Antecedent::isInvisible(a->type())));
             antecedents << a->zmkCode();
         }
         out << buildBehavior(LayerType::Base, static_cast<MorphType>(morphType),
@@ -270,9 +271,10 @@ void ZmkCodeGenerator::generateBaseBehaviors(QTextStream &out)
                 auto const macroParams = m_macros.find(mod);
                 bindings << (static_cast<Mode>(mod->mode()) == Mode::MacroName
                              ? QString{"<&amstdm_%1>"}.arg(mod->value())
-                             : buildBinding(mod->isSingleLettered(a->symbol()),
+                             : buildBinding(mod->isSingleLettered(a->type()),
                                          (macroParams != m_macros.cend() ? macroParams->second->label : QString{}),
-                                         mod->value()));
+                                         mod->value(),
+                                         Antecedent::isInvisible(a->type())));
                 antecedents << a->zmkCode();
             }
             out << buildBehavior(LayerType::Base, static_cast<MorphType>(morphType), static_cast<ModType>(modType),
@@ -295,9 +297,10 @@ void ZmkCodeGenerator::generateDeepBehaviors(QTextStream &out)
                 auto const macroParams = m_macros.find(morph);
                 bindings << (static_cast<Mode>(morph->mode()) == Mode::MacroName
                             ? QString{"<&amstdm_%1>"}.arg(morph->value())
-                            : buildBinding(morph->isSingleLettered(a->symbol()),
+                            : buildBinding(morph->isSingleLettered(a->type()),
                                            (macroParams != m_macros.cend() ? macroParams->second->label : QString{}),
-                                           morph->value()));
+                                           morph->value(),
+                                           Antecedent::isInvisible(a->type())));
                 antecedents << a->zmkCode();
             }
             out << buildBehavior(static_cast<LayerType>(layerType), static_cast<MorphType>(morphType),
@@ -313,9 +316,10 @@ void ZmkCodeGenerator::generateDeepBehaviors(QTextStream &out)
                     auto const macroParams = m_macros.find(mod);
                     bindings << (static_cast<Mode>(mod->mode()) == Mode::MacroName
                                  ? QString{"<&amstdm_%1>"}.arg(mod->value())
-                                 : buildBinding(mod->isSingleLettered(a->symbol()),
+                                 : buildBinding(mod->isSingleLettered(a->type()),
                                              (macroParams != m_macros.cend() ? macroParams->second->label : QString{}),
-                                             mod->value()));
+                                             mod->value(),
+                                             Antecedent::isInvisible(a->type())));
                     antecedents << a->zmkCode();
                 }
                 out << buildBehavior(static_cast<LayerType>(layerType), static_cast<MorphType>(morphType), static_cast<ModType>(modType),
@@ -335,9 +339,10 @@ void ZmkCodeGenerator::generateDeepBehaviors(QTextStream &out)
                 auto const macroParams = m_macros.find(morph);
                 bindings << (static_cast<Mode>(morph->mode()) == Mode::MacroName
                             ? QString{"<&amstdm_%1>"}.arg(morph->value())
-                            : buildBinding(morph->isSingleLettered(a->symbol()),
+                            : buildBinding(morph->isSingleLettered(a->type()),
                                            (macroParams != m_macros.cend() ? macroParams->second->label : QString{}),
-                                           morph->value()));
+                                           morph->value(),
+                                           Antecedent::isInvisible(a->type())));
                 antecedents << a->zmkCode();
             }
             out << buildBehavior(static_cast<LayerType>(layerType), static_cast<MorphType>(morphType),
@@ -353,9 +358,10 @@ void ZmkCodeGenerator::generateDeepBehaviors(QTextStream &out)
                     auto const macroParams = m_macros.find(mod);
                     bindings << (static_cast<Mode>(mod->mode()) == Mode::MacroName
                                  ? QString{"<&amstdm_%1>"}.arg(mod->value())
-                                 : buildBinding(mod->isSingleLettered(a->symbol()),
+                                 : buildBinding(mod->isSingleLettered(a->type()),
                                              (macroParams != m_macros.cend() ? macroParams->second->label : QString{}),
-                                             mod->value()));
+                                             mod->value(),
+                                             Antecedent::isInvisible(a->type())));
                     antecedents << a->zmkCode();
                 }
                 out << buildBehavior(static_cast<LayerType>(layerType), static_cast<MorphType>(morphType), static_cast<ModType>(modType),
@@ -387,7 +393,7 @@ void ZmkCodeGenerator::generateMacros(QTextStream &out)
                 break;
         }
 
-        out << buildMacro(m->symbol, m->label, val, m->item->pressedModifier());
+        out << buildMacro(m->symbol, m->label, val, m->item->pressedModifier(), Antecedent::isInvisible(m->type));
     }
     out << QString{}.fill(' ', 4) << "};\n";
 }
@@ -867,10 +873,11 @@ void ZmkCodeGenerator::generateDeepModMorphs(QTextStream &out)
     out << tmpl.sliced(1).arg(m_schema->prefix()) << "\n";
 }
 
-QString ZmkCodeGenerator::buildBinding(bool isSingleLettered, const QString &macroLabel, const QString &value) const
+QString ZmkCodeGenerator::buildBinding(bool isSingleLettered, const QString &macroLabel, const QString &value,
+                                       bool isAntecedentInvisible) const
 {
     if (isSingleLettered)
-        return QString{"<&kp %1>"}.arg(zmkKeycode(value.sliced(1,1)));
+        return QString{"<&kp %1>"}.arg(zmkKeycode(isAntecedentInvisible ? value : value.sliced(1,1)));
 
     return QString{"<&am%1_%2>"}.arg(m_schema->prefix(), macroLabel);
 }
@@ -900,7 +907,8 @@ QString ZmkCodeGenerator::buildMacroLabel(const QString &value, QHash<QString,bo
     return label + (postfix ? QString::number(postfix) : QString{});
 }
 
-QString ZmkCodeGenerator::buildMacro(const QString &symbol, const QString &label, const QString &value, Modifier modToIgnore) const
+QString ZmkCodeGenerator::buildMacro(const QString &symbol, const QString &label, const QString &value, Modifier modToIgnore,
+                                     bool isAntecedentInvisible) const
 {
     static QString tmpl{R"TMPL(am%1_%2: am%1_%2 {
             compatible = "zmk,behavior-macro";
@@ -914,7 +922,9 @@ QString ZmkCodeGenerator::buildMacro(const QString &symbol, const QString &label
     QString out = tmpl;
     QString pre, firstOp;
     QString val = value;
-    if (symbol.toLower() == (m_schema->backspacePolicy() == Schema::BackspaceOnDifferentLetter
+    if (isAntecedentInvisible) {
+        pre = QString("(") + val + ")";
+    } else if (symbol.toLower() == (m_schema->backspacePolicy() == Schema::BackspaceOnDifferentLetter
             ? val.first(1).toLower()
             : val.first(1)))
     {

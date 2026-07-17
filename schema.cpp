@@ -104,8 +104,8 @@ Schema::Schema(Type type, SchemaItem *parent)
       m_antecedents{},
       m_changed{false}
 {
-    m_antecedents.reserve(Antecedent::Space+1);
-    for (int type = Antecedent::A; type <= Antecedent::Space; ++type)
+    m_antecedents.reserve(Antecedent::Right+1);
+    for (int type = Antecedent::A; type <= Antecedent::Right; ++type)
         m_antecedents.push_back(std::make_unique<Antecedent>(static_cast<Antecedent::Type>(type), this));
 }
 
@@ -474,6 +474,12 @@ bool Antecedent::isRight() const
         case Dot:
         case Slash:
         case Space:
+        case Home:
+        case End:
+        case Left:
+        case Up:
+        case Down:
+        case Right:
             return true;
         default:
             return false;
@@ -597,6 +603,12 @@ QString Antecedent::symbol(Type type)
         case Backslash: return "\\";
         case Minus: return "-";
         case Space: return " ";
+        case Home: return "Home";
+        case End: return "End";
+        case Left: return "Left";
+        case Up: return "Up";
+        case Down: return "Down";
+        case Right: return "Right";
     }
     assert(false && "Should not happen");
     return {};
@@ -670,6 +682,12 @@ QString Antecedent::ZMKCode(Type type)
         case Backslash: return "BSLH";
         case Minus: return "MINUS";
         case Space: return "SPACE";
+        case Home: return "HOME";
+        case End: return "END";
+        case Left: return "LEFT";
+        case Up: return "UP";
+        case Down: return "DOWN";
+        case Right: return "RIGHT";
     }
     assert(false && "Should not happen");
     return {};
@@ -743,9 +761,30 @@ QString Antecedent::QMKCode(Type type)
         case Backslash: return "KC_BSLS";
         case Minus: return "KC_MINS";
         case Space: return "KC_SPC";
+        case Home: return "KC_HOME";
+        case End: return "KC_END";
+        case Left: return "KC_LEFT";
+        case Up: return "KC_UP";
+        case Down: return "KC_DOWN";
+        case Right: return "KC_RIGHT";
     }
     assert(false && "Should not happen");
     return {};
+}
+
+bool Antecedent::isInvisible(Type type)
+{
+    switch (type) {
+        case Home:
+        case End:
+        case Left:
+        case Up:
+        case Down:
+        case Right:
+            return true;
+        default:
+            return false;
+    }
 }
 
 int Antecedent::rowOf(const SchemaItem *me) const
@@ -986,9 +1025,12 @@ bool Morph::isEmpty(ModType modType) const
     return m_mods[static_cast<int>(modType)]->isEmpty();
 }
 
-bool Morph::isValid() const
+bool Morph::isValid(Antecedent::Type const type) const
 {
     if (m_mode == Mode::SchemaName)
+        return true;
+
+    if (Antecedent::isInvisible(type))
         return true;
 
     return m_value.size() != 1;
@@ -999,8 +1041,12 @@ Mod *Morph::getMod(ModType modType) const
     return m_mods[static_cast<int>(modType)].get();
 }
 
-bool Morph::isSingleLettered(QString const &symbol) const
+bool Morph::isSingleLettered(Antecedent::Type const type) const
 {
+    if (Antecedent::isInvisible(type) && m_value.length() == 1)
+        return true;
+
+    QString const symbol = Antecedent::symbol(type);
     return m_mode == Mode::Text && m_value.length() == 2 && m_value.first(1).toLower() == symbol.toLower();
 }
 
@@ -1170,16 +1216,23 @@ bool Mod::isEmpty() const
     return m_value.isEmpty();
 }
 
-bool Mod::isValid() const
+bool Mod::isValid(Antecedent::Type const type) const
 {
     if (m_mode == Mode::SchemaName)
+        return true;
+
+    if (Antecedent::isInvisible(type))
         return true;
 
     return m_value.size() != 1;
 }
 
-bool Mod::isSingleLettered(const QString &symbol) const
+bool Mod::isSingleLettered(Antecedent::Type const type) const
 {
+    if (Antecedent::isInvisible(type) && m_value.length() == 1)
+        return true;
+
+    QString const symbol = Antecedent::symbol(type);
     return m_mode == Mode::Text && m_value.length() == 2 && m_value.first(1).toLower() == symbol.toLower();
 }
 

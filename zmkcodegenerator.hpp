@@ -28,9 +28,11 @@ private:
     void generateDeepModMorphs(QTextStream &out);
 
 private:
-    QString buildBinding(bool isSingleLettered, QString const &macroLabel, const QString &value) const;
+    QString buildBinding(bool isSingleLettered, QString const &macroLabel, const QString &value,
+                         bool isAntecedentInvisible) const;
     QString buildMacroLabel(QString const &value, QHash<QString, bool> &usedLabels) const;
-    QString buildMacro(QString const &symbol, QString const &label, const QString &value, Modifier modToIgnore) const;
+    QString buildMacro(QString const &symbol, QString const &label, const QString &value, Modifier modToIgnore,
+                       bool isAntecedentInvisible) const;
     QString buildBehavior(LayerType layerType, MorphType morphType, ModType modType,
                           QString const &bindings, QString const &antecedents) const;
     QString buildBehavior(LayerType layerType, MorphType morphType,
@@ -40,11 +42,12 @@ private:
 
 private:
     struct MacroParams {
-        MacroParams(QString const &label, QString const &symbol, SchemaItem *item)
-            : label{label}, symbol{symbol}, item{item}
+        MacroParams(QString const &label, QString const &symbol, Antecedent::Type type, SchemaItem *item)
+            : label{label}, symbol{symbol}, type{type}, item{item}
         { }
         QString label;
         QString symbol;
+        Antecedent::Type type;
         SchemaItem *item;
     };
     std::unordered_map<SchemaItem*, std::unique_ptr<MacroParams>> m_macros;

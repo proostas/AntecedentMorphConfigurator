@@ -170,7 +170,8 @@ public:
         Colon, Dollar, Percent, Caret, Plus,
         Tilda, Exclamation, At, Hash, Pipe,
         Ampersand, Underscore,
-        LBracket, RBracket, Semicolon, Grave, Equal, Backslash, Minus, Space
+        LBracket, RBracket, Semicolon, Grave, Equal, Backslash, Minus, Space,
+        Home, End, Left, Up, Down, Right
     };
 public:
     explicit Antecedent(Type type, SchemaItem *parent);
@@ -211,6 +212,7 @@ public:
     static QString symbol(Type type);
     static QString ZMKCode(Type type);
     static QString QMKCode(Type type);
+    static bool isInvisible(Type type);
 
 protected:
     int rowOf(SchemaItem const *me) const override;
@@ -274,11 +276,11 @@ public:
 
     bool isEmpty() const;
     bool isEmpty(ModType modType) const;
-    bool isValid() const;
+    bool isValid(Antecedent::Type const type) const;
 
     Mod *getMod(ModType modType) const;
 
-    bool isSingleLettered(const QString &symbol) const;
+    bool isSingleLettered(Antecedent::Type const type) const;
 
 public: // SchemaItem interface
     SchemaItem::Kind kind() const override;
@@ -324,9 +326,9 @@ public:
     void clear();
 
     bool isEmpty() const;
-    bool isValid() const;
+    bool isValid(Antecedent::Type const type) const;
 
-    bool isSingleLettered(QString const &symbol) const;
+    bool isSingleLettered(Antecedent::Type const type) const;
 
 public: // SchemaItem interface
     SchemaItem::Kind kind() const override;
