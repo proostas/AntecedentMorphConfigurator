@@ -171,7 +171,9 @@ public:
         Tilda, Exclamation, At, Hash, Pipe,
         Ampersand, Underscore,
         LBracket, RBracket, Semicolon, Grave, Equal, Backslash, Minus, Space,
-        Home, End, Left, Up, Down, Right
+        Home, End,
+        Left, Right,
+        Up, Down
     };
 public:
     explicit Antecedent(Type type, SchemaItem *parent);

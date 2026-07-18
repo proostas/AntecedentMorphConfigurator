@@ -104,8 +104,8 @@ Schema::Schema(Type type, SchemaItem *parent)
       m_antecedents{},
       m_changed{false}
 {
-    m_antecedents.reserve(Antecedent::Right+1);
-    for (int type = Antecedent::A; type <= Antecedent::Right; ++type)
+    m_antecedents.reserve(Antecedent::Down+1);
+    for (int type = Antecedent::A; type <= Antecedent::Down; ++type)
         m_antecedents.push_back(std::make_unique<Antecedent>(static_cast<Antecedent::Type>(type), this));
 }
 
@@ -477,9 +477,9 @@ bool Antecedent::isRight() const
         case Home:
         case End:
         case Left:
+        case Right:
         case Up:
         case Down:
-        case Right:
             return true;
         default:
             return false;
@@ -606,9 +606,9 @@ QString Antecedent::symbol(Type type)
         case Home: return "Home";
         case End: return "End";
         case Left: return "Left";
+        case Right: return "Right";
         case Up: return "Up";
         case Down: return "Down";
-        case Right: return "Right";
     }
     assert(false && "Should not happen");
     return {};
@@ -685,9 +685,9 @@ QString Antecedent::ZMKCode(Type type)
         case Home: return "HOME";
         case End: return "END";
         case Left: return "LEFT";
+        case Right: return "RIGHT";
         case Up: return "UP";
         case Down: return "DOWN";
-        case Right: return "RIGHT";
     }
     assert(false && "Should not happen");
     return {};
@@ -764,9 +764,9 @@ QString Antecedent::QMKCode(Type type)
         case Home: return "KC_HOME";
         case End: return "KC_END";
         case Left: return "KC_LEFT";
+        case Right: return "KC_RIGHT";
         case Up: return "KC_UP";
         case Down: return "KC_DOWN";
-        case Right: return "KC_RIGHT";
     }
     assert(false && "Should not happen");
     return {};
@@ -778,9 +778,9 @@ bool Antecedent::isInvisible(Type type)
         case Home:
         case End:
         case Left:
+        case Right:
         case Up:
         case Down:
-        case Right:
             return true;
         default:
             return false;
