@@ -923,7 +923,7 @@ QString ZmkCodeGenerator::buildMacro(const QString &symbol, const QString &label
     QString pre, firstOp;
     QString val = value;
     if (isAntecedentInvisible) {
-        pre = QString("(") + val + ")";
+        pre = "";
     } else if (symbol.toLower() == (m_schema->backspacePolicy() == Schema::BackspaceOnDifferentLetter
             ? val.first(1).toLower()
             : val.first(1)))
